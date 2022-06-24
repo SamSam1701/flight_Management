@@ -21,20 +21,39 @@ namespace Flight_Management.DAO
 
         public static DataTable GetData(string sql)
         {
-
-            MySqlConnection conn = dbAcess.ConnectionDB();
-
-            conn.Open();
-
-            MySqlDataAdapter adap = new MySqlDataAdapter(sql, conn);
-
             DataTable dt = new DataTable();
+            using (MySqlConnection conn = dbAcess.ConnectionDB())
+            {
 
-            adap.Fill(dt);
+                conn.Open();
 
-            conn.Close();
+                MySqlDataAdapter adap = new MySqlDataAdapter(sql, conn);
+
+                adap.Fill(dt);
+
+                conn.Close();
+            }
 
             return dt;
+        }
+        public static long insertData(string sql)
+        {
+            long id;
+            using (MySqlConnection conn = dbAcess.ConnectionDB())
+            {
+
+                conn.Open();
+
+                MySqlCommand cmd = new MySqlCommand(sql, conn);
+
+                cmd.ExecuteNonQuery();
+
+                id = cmd.LastInsertedId;
+
+                conn.Close();
+            }
+
+            return id;
         }
 
         public static int ExecuteSQL(string sql)
@@ -48,28 +67,8 @@ namespace Flight_Management.DAO
             var res = cmd.ExecuteNonQuery();
 
             conn.Close();
-
             return res;
         }
 
-        public static int CheckUserLogin(string username, string password)
-        {
-            if (khachhangDAO.Login(username, password).Rows.Count > 0)
-            {
-                return 1;
-            }
-            else if (AdminDAO.Login(username, password).Rows.Count > 0)
-            {
-                return 0;
-            }
-            else if (NhanvienDAO.Login(username, password).Rows.Count > 0)
-            {
-                return 2;
-            }
-            else
-            {
-                return -1;
-            }
-        }
     }
 }
